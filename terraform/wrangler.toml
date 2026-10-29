@@ -1,0 +1,7 @@
+name = "student-task-manager-iac"
+main = "application/worker.mjs"
+compatibility_date = "2026-10-12"
+
+[[kv_namespaces]]
+binding = "TASKS_KV"
+id = "9a0421c32ca24efc8ff83457c81cedc3"

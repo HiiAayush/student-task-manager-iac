@@ -1,0 +1,6 @@
+cloudflare_account_id = "YOUR_CLOUDFLARE_ACCOUNT_ID"
+cloudflare_api_token  = "SET_THIS_LOCALLY_ONLY_DO_NOT_COMMIT"
+worker_name           = "student-task-manager-iac"
+kv_namespace_name     = "student_tasks"
+environment           = "development"
+workers_dev_subdomain = "YOUR_WORKERS_DEV_SUBDOMAIN_OPTIONAL"
