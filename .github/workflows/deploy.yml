@@ -1,3 +1,44 @@
+name: Terraform CI/CD
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'terraform/**'
+      - 'application/**'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform
+    env:
+      TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive
+      - name: Terraform Init
+        run: terraform init
+      - name: Terraform Validate
+        run: terraform validate
+      - name: Terraform Plan
+        run: terraform plan
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        run: terraform apply -auto-approve
+
+
 steps:
   # 1. Checkout repository (v4 latest patch release use karo)
   - name: Checkout repository
