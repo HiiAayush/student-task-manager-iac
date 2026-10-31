@@ -62,20 +62,29 @@ jobs:
       - name: Show Terraform Provider Version
         run: terraform providers
 
-      - name: Terraform Plan
+      - name: Debug Cloudflare Account Configuration
         env:
           TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
-          echo "Checking account ID variable..."
+          echo "Checking account ID..."
+          echo "Account ID length: ${#TF_VAR_cloudflare_account_id}"
 
           if [ -z "$TF_VAR_cloudflare_account_id" ]; then
             echo "ERROR: Account ID is empty"
             exit 1
           fi
 
-          echo "Account ID is configured."
+          echo "Account ID is present."
 
+          echo "Checking Terraform configuration..."
+          grep -n -E 'account_id|title|cloudflare_workers_kv_namespace' main.tf
+
+      - name: Terraform Plan
+        env:
+          TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
           terraform plan -input=false
 
       - name: Terraform Apply
