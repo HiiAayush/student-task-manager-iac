@@ -1,3 +1,4 @@
+
 name: Terraform CI/CD
 
 on:
@@ -5,9 +6,16 @@ on:
     branches:
       - main
 
+  workflow_dispatch:
+
 jobs:
   terraform:
+    name: Deploy Cloudflare Infrastructure
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./terraform
 
     steps:
       - name: Checkout Repository
@@ -18,20 +26,35 @@ jobs:
         with:
           terraform_version: 1.6.0
 
-      - name: Terraform Init
-        run: terraform init
-        working-directory: ./terraform
+      - name: Check Cloudflare Secrets
+        run: |
+          if [ -z "$TF_VAR_cloudflare_account_id" ]; then
+            echo "Cloudflare Account ID is missing"
+            exit 1
+          fi
+
+          if [ -z "$TF_VAR_cloudflare_api_token" ]; then
+            echo "Cloudflare API Token is missing"
+            exit 1
+          fi
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 
-      - name: Terraform Apply
-        run: terraform apply -auto-approve -input=false
-        working-directory: ./terraform
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: terraform plan
+
+      - name: Terraform Apply
+        env:
+          TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: terraform apply -auto-approve -input=false
