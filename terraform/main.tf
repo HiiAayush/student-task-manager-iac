@@ -1,15 +1,10 @@
-
 terraform {
   required_providers {
     cloudflare = {
       source  = "cloudflare/cloudflare"
-      version = "4.52.9"
+      version = "4.52.10"
     }
   }
-}
-
-variable "cloudflare_account_id" {
-  type = string
 }
 
 variable "cloudflare_api_token" {
@@ -22,14 +17,6 @@ provider "cloudflare" {
 }
 
 resource "cloudflare_workers_kv_namespace" "tasks_kv" {
-  account_id = var.cloudflare_account_id
+  account_id = "30462a702c81b1cb09dc7bf74572ec52"
   title      = "student_tasks"
-}
-
-output "kv_namespace_id" {
-  value = cloudflare_workers_kv_namespace.tasks_kv.id
-}
-
-output "kv_namespace_title" {
-  value = cloudflare_workers_kv_namespace.tasks_kv.title
 }
