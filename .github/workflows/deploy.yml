@@ -31,12 +31,12 @@ jobs:
           TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           test -n "$TF_VAR_cloudflare_account_id" || {
-            echo "Account ID missing"
+            echo "ERROR: Account ID missing"
             exit 1
           }
 
           test -n "$TF_VAR_cloudflare_api_token" || {
-            echo "API token missing"
+            echo "ERROR: API token missing"
             exit 1
           }
 
@@ -66,7 +66,17 @@ jobs:
         env:
           TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: terraform plan -input=false
+        run: |
+          echo "Checking account ID variable..."
+
+          if [ -z "$TF_VAR_cloudflare_account_id" ]; then
+            echo "ERROR: Account ID is empty"
+            exit 1
+          fi
+
+          echo "Account ID is configured."
+
+          terraform plan -input=false
 
       - name: Terraform Apply
         env:
